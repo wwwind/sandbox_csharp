@@ -41,6 +41,8 @@ namespace ImageInfo
         private string imageDir;
         private Dictionary<string, List<FileData>> data = new Dictionary<string, List<FileData>>();
         private double givenSize = 1;
+        private Font printFont;
+        private List<string> streamToPrint = new List<string>();
 
         public MainWindow()
         {
@@ -133,6 +135,7 @@ namespace ImageInfo
                 foreach (FileData title in titles)
                 {
                     textDisplay += " \u2022 " + title.ToString() + "\n";
+                    streamToPrint.Add("test: " + title.Name + " size: " + title.Size);
                 }
                 textDisplay += "\n";
             }
@@ -197,10 +200,71 @@ namespace ImageInfo
 
         private void printButton_Click(object sender, RoutedEventArgs e)
         {
-            PrintDocument pd = new PrintDocument();
-            
-            
+
+          //  streamToPrint = new StreamReader("c:\\1.txt");
+            try
+            {
+                this.fillStreamToPrint();
+                printFont = new Font("Arial", 10);
+
+                PrintDocument pd = new PrintDocument();
+                pd.PrintPage += new PrintPageEventHandler(this.pd_PrintPage);
+                pd.Print();
+            }
+            finally
+            {
+              //  streamToPrint.Close();
+            }
         }
 
+        private void fillStreamToPrint()
+        {
+            //Get a list of key values (single characters), sorted alphabetically
+            List<string> keys = new List<string>(data.Keys);
+            keys.Sort();
+
+            //Display the directory name
+            textDisplay = "Big files in: " + imageDir + "\n\n";
+
+            //For each key, display the key, and then its members, also sorted
+            foreach (string key in keys)
+            {
+                textDisplay += key + "\n";
+
+                List<FileData> titles = data[key];
+                foreach (FileData title in titles)
+                {
+                    textDisplay += " \u2022 " + title.ToString() + "\n";
+                }
+                textDisplay += "\n";
+            }
+
+            txtOutput.Text = textDisplay;
+        }
+
+        // The PrintPage event is raised for each page to be printed. 
+        private void pd_PrintPage(object sender, PrintPageEventArgs ev)
+        {
+            float linesPerPage = 0;
+            float yPos = 0;
+            int count = 0;
+            float leftMargin = ev.MarginBounds.Left;
+            float topMargin = ev.MarginBounds.Top;
+            
+            // Calculate the number of lines per page.
+            linesPerPage = ev.MarginBounds.Height /
+               printFont.GetHeight(ev.Graphics);
+
+            // Print each line of the file. 
+            foreach(string line in streamToPrint)
+            {
+                yPos = topMargin + (count *
+                   printFont.GetHeight(ev.Graphics));
+                ev.Graphics.DrawString(line, printFont, Brushes.Black,
+                   leftMargin, yPos, new StringFormat());
+                count++;
+            }
+        }
+            
     }
 }
