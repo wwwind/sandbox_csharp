@@ -50,7 +50,7 @@ namespace ImageInfo
 
             //Initialize output
             txtOutput.Text = "";
-
+            nrFound.Content = -1;
 
         }
 
@@ -71,8 +71,27 @@ namespace ImageInfo
 
                 //Display the results
                 DisplayResults();
+                nrFound.Content = numberOfElements(data);
             }
 
+        }
+
+        private long numberOfElements(Dictionary<string, List<FileData>> data)
+        {
+            long nr = 0;
+            List<string> keys = new List<string>(data.Keys);
+           
+            //For each key, display the key, and then its members, also sorted
+            foreach (string key in keys)
+            {
+                List<FileData> files = data[key];
+                foreach (FileData f in files)
+                {
+                    nr++;
+                }
+            }
+
+            return nr;
         }
 
         //Get the data
@@ -124,7 +143,7 @@ namespace ImageInfo
             keys.Sort();
 
             //Display the directory name
-            textDisplay = "Big files in: " + imageDir + "\n\n";
+            textDisplay = "Big models in: " + imageDir + "\n\n";
 
             //For each key, display the key, and then its members, also sorted
             foreach (string key in keys)
